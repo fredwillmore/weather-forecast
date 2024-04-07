@@ -16,4 +16,6 @@ hello this is the weather page
     <p><%= daily[:name] %>: <%= daily[:detailed_forecast] %></p>
   <% end %>
 </div>
-
+<% if from_cache %>
+  <div>CONTENT FROM CACHE</div>
+<% end %>

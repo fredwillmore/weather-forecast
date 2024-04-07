@@ -1,4 +1,6 @@
 class HomeController < ApplicationController
+  CACHE_EXPIRE = 1800
+  
   def index
   end
 
@@ -8,6 +10,7 @@ class HomeController < ApplicationController
       low_temperature: low_temperature,
       high_temperature: high_temperature,
       extended_forecast: extended_forecast,
+      from_cache: @from_cache.present?
     }
   rescue StandardError => e
     error_message = "An error occurred: #{e.message}"
@@ -36,7 +39,11 @@ class HomeController < ApplicationController
   end
 
   def lng
-    params[:coordinates][0].to_f.round(4)
+    params[:coordinates][1].to_f.round(4)
+  end
+
+  def post_code
+    params[:post_code]
   end
 
   def fetch_resource(url)
@@ -49,8 +56,21 @@ class HomeController < ApplicationController
     end
   end
 
+  def fetch_cached_resource(post_code, name)
+    key = "#{post_code}_#{name}"
+
+    @from_cache = Rails.cache.read(key)
+  end
+
+  def set_cached_resource(post_code, name, value)
+    key = "#{post_code}_#{name}"
+
+    Rails.cache.write(key, value, CACHE_EXPIRE)
+  end
+
   def points
-    @points ||= fetch_resource("https://api.weather.gov/points/#{lat},#{lon}")
+    @points ||= fetch_cached_resource(post_code, 'points')
+    @points ||= fetch_resource("https://api.weather.gov/points/#{lat},#{lng}")
   end
   
   def forecast

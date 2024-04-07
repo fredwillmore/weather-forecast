@@ -76,20 +76,47 @@ describe "Home", type: :request do
     let(:points) { JSON::parse file_fixture("points.json").read }
     let(:forecast) { JSON::parse file_fixture("forecast.json").read }
     let(:forecast_hourly) { JSON::parse file_fixture("forecast_hourly.json").read }
+    let(:points_url) { "https://api.weather.gov/points/45.5605,-122.6405" }
+    let(:forecast_url) { "https://api.weather.gov/gridpoints/PQR/114,105/forecast" }
+    let(:forecast_hourly_url) { "https://api.weather.gov/gridpoints/PQR/114,105/forecast/hourly" }
+    let(:points_cached) { nil }
+    let(:forecast_cached) { nil }
+    let(:forecast_hourly_cached) { nil }
 
     before do
-      allow_any_instance_of(HomeController).to receive(:points).and_return(points)
-      allow_any_instance_of(HomeController).to receive(:forecast).and_return(forecast)
-      allow_any_instance_of(HomeController).to receive(:forecast_hourly).and_return(forecast_hourly)
+      allow_any_instance_of(HomeController).to receive(:fetch_resource).with(points_url).and_return(points)
+      allow_any_instance_of(HomeController).to receive(:fetch_resource).with(forecast_url).and_return(forecast)
+      allow_any_instance_of(HomeController).to receive(:fetch_resource).with(forecast_hourly_url).and_return(forecast_hourly)
 
-      get "/weather", params: { post_code: '12345', coordinates: [45, -122] }
+      allow(Rails.cache).to receive(:read).with("12345_points").and_return(points_cached)
+      allow(Rails.cache).to receive(:read).with("12345_forecast").and_return(forecast_cached)
+      allow(Rails.cache).to receive(:read).with("12345_forecast_hourly").and_return(forecast_hourly_cached)
+
+      get "/weather", params: { post_code: '12345', coordinates: [45.5605,-122.6405] }
     end
 
-    it 'responds with html' do
-      expect(response).to be_successful
-      expect(response.content_type).to include("text/html")
-      expect(response).to render_template("weather")
-      expect(response.body).to include("Monday: A chance of rain showers after 11am. Mostly cloudy, with a high near 57. South southwest wind 5 to 9 mph. Chance of precipitation is 40%.")
+    context "when value is from cache" do
+      let(:points_cached) { points }
+      let(:forecast_cached) { forecast }
+      let(:forecast_hourly_cached) { forecast_hourly }
+
+      it 'responds with html' do
+        expect(response).to be_successful
+        expect(response.content_type).to include("text/html")
+        expect(response).to render_template("weather")
+        expect(response.body).to include("Monday: A chance of rain showers after 11am. Mostly cloudy, with a high near 57. South southwest wind 5 to 9 mph. Chance of precipitation is 40%.")
+        expect(response.body).to include("CONTENT FROM CACHE")
+      end
+    end
+
+    context "when value is not from cache" do
+      it 'responds with html' do
+        expect(response).to be_successful
+        expect(response.content_type).to include("text/html")
+        expect(response).to render_template("weather")
+        expect(response.body).to include("Monday: A chance of rain showers after 11am. Mostly cloudy, with a high near 57. South southwest wind 5 to 9 mph. Chance of precipitation is 40%.")
+        expect(response.body).not_to include("CONTENT FROM CACHE")
+      end
     end
   end
 end
