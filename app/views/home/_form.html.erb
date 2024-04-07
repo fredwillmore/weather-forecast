@@ -1,4 +1,5 @@
 <%= form_with url: address_select_path, local: true do |form| %>
+  <label for="address">Search for an address</label>
   <%= form.text_field :address %>
   <%= form.submit :submit %>
 <% end %>

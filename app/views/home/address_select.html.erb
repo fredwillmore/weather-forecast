@@ -1,17 +1,13 @@
-<%
-  # debugger
-%>
-<%= 
-  render "form"
-%>
-hello this is the address select page
-
+<%= render "form" %>
 <% if (addresses.empty?) %>
   <div>
     No results found for "<%= params[:address] %>"
   </div>
 <%else %>
 
+  <label for="address">
+    Select an address from the following list
+  </label>
   <% (addresses).each do |address| %>
     <div>
       <a href="<%= weather_path( coordinates: address[:coordinates], postal_code: address[:postal_code]) %>">
