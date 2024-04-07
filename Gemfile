@@ -72,4 +72,3 @@ end
 
 gem "geocoder"
 gem "rails-controller-testing"
-gem "redis-rails"
