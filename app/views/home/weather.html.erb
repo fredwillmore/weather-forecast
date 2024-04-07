@@ -1,0 +1,19 @@
+<%
+  # debugger
+%>
+
+<%= 
+  # render "form"
+%>
+hello this is the weather page
+
+<div>current temperature: <%= current_temperature %></div>
+<div>high: <%= high_temperature %></div>
+<div>low: <%= low_temperature %></div>
+<div>
+  <p>extended forecast:</p>
+  <% extended_forecast.each do |daily| %>
+    <p><%= daily[:name] %>: <%= daily[:detailed_forecast] %></p>
+  <% end %>
+</div>
+
