@@ -15,12 +15,14 @@ describe "Home", type: :request do
       result = double('Geocoder::Result::Nominatim')
       allow(result).to receive(:display_name).and_return "White House, 1600, Pennsylvania Avenue Northwest, Ward 2, Washington, District of Columbia, 20500, United States"
       allow(result).to receive(:coordinates).and_return [38.897699700000004, -77.03655315]
+      allow(result).to receive(:postal_code).and_return '20500'
       result
     }
     let(:result_2) { 
       result = double('Geocoder::Result::Nominatim')
       allow(result).to receive(:display_name).and_return "The Oval Office, 1600, Pennsylvania Avenue Northwest, Ward 2, Washington, District of Columbia, 20006, United States"
       allow(result).to receive(:coordinates).and_return [38.89737555, -77.0374079114865]
+      allow(result).to receive(:postal_code).and_return '20500'
       result
     }
 
@@ -71,7 +73,15 @@ describe "Home", type: :request do
   end
 
   describe "GET /weather" do
+    let(:points) { JSON::parse file_fixture("points.json").read }
+    let(:forecast) { JSON::parse file_fixture("forecast.json").read }
+    let(:forecast_hourly) { JSON::parse file_fixture("forecast_hourly.json").read }
+
     before do
+      allow_any_instance_of(HomeController).to receive(:points).and_return(points)
+      allow_any_instance_of(HomeController).to receive(:forecast).and_return(forecast)
+      allow_any_instance_of(HomeController).to receive(:forecast_hourly).and_return(forecast_hourly)
+
       get "/weather", params: { post_code: '12345', coordinates: [45, -122] }
     end
 
@@ -79,8 +89,7 @@ describe "Home", type: :request do
       expect(response).to be_successful
       expect(response.content_type).to include("text/html")
       expect(response).to render_template("weather")
-      expect(response.body).to include("The Oval Office, 1600, Pennsylvania Avenue Northwest, Ward 2, Washington, District of Columbia, 20006, United States")
-      expect(response.body).to include("White House, 1600, Pennsylvania Avenue Northwest, Ward 2, Washington, District of Columbia, 20500, United States")
+      expect(response.body).to include("Monday: A chance of rain showers after 11am. Mostly cloudy, with a high near 57. South southwest wind 5 to 9 mph. Chance of precipitation is 40%.")
     end
-end
+  end
 end
