@@ -70,4 +70,5 @@ group :test do
   gem "rspec-rails"
 end
 
-gem 'geocoder'
+gem "geocoder"
+gem "rails-controller-testing"
