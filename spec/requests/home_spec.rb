@@ -76,23 +76,20 @@ describe "Home", type: :request do
     let(:points) { JSON::parse file_fixture("points.json").read }
     let(:forecast) { JSON::parse file_fixture("forecast.json").read }
     let(:forecast_hourly) { JSON::parse file_fixture("forecast_hourly.json").read }
-    let(:points_url) { "https://api.weather.gov/points/45.5605,-122.6405" }
-    let(:forecast_url) { "https://api.weather.gov/gridpoints/PQR/114,105/forecast" }
-    let(:forecast_hourly_url) { "https://api.weather.gov/gridpoints/PQR/114,105/forecast/hourly" }
     let(:points_cached) { nil }
     let(:forecast_cached) { nil }
     let(:forecast_hourly_cached) { nil }
 
     before do
-      allow_any_instance_of(HomeController).to receive(:fetch_resource).with(points_url).and_return(points)
-      allow_any_instance_of(HomeController).to receive(:fetch_resource).with(forecast_url).and_return(forecast)
-      allow_any_instance_of(HomeController).to receive(:fetch_resource).with(forecast_hourly_url).and_return(forecast_hourly)
+      allow_any_instance_of(HomeController).to receive(:fetch_resource).with('points').and_return(points)
+      allow_any_instance_of(HomeController).to receive(:fetch_resource).with('forecast').and_return(forecast)
+      allow_any_instance_of(HomeController).to receive(:fetch_resource).with('forecast_hourly').and_return(forecast_hourly)
 
       allow(Rails.cache).to receive(:read).with("12345_points").and_return(points_cached)
       allow(Rails.cache).to receive(:read).with("12345_forecast").and_return(forecast_cached)
       allow(Rails.cache).to receive(:read).with("12345_forecast_hourly").and_return(forecast_hourly_cached)
 
-      get "/weather", params: { post_code: '12345', coordinates: [45.5605,-122.6405] }
+      get "/weather", params: { postal_code: '12345', coordinates: [45.5605,-122.6405] }
     end
 
     context "when value is from cache" do
